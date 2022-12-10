@@ -11,7 +11,7 @@ const sqlite3 = require("sqlite3");
 const bcrypt = require("bcrypt");
 const jsonwebtoken = require("jsonwebtoken");
 let db;
-
+//////////////////// initializeDBServer ////////////////////
 let initializeDBServer = async () => {
   try {
     db = await open({ filename: dbPath, driver: sqlite3.Database });
@@ -24,7 +24,7 @@ let initializeDBServer = async () => {
   }
 };
 initializeDBServer();
-////////////////////
+//////////////////// AuthenticateToken ////////////////////
 let AuthenticateToket = (request, response, next) => {
   let jwtToken = request.headers["authorization"];
   if (jwtToken !== undefined) {
@@ -47,60 +47,75 @@ let AuthenticateToket = (request, response, next) => {
     response.send("Invalid JWT Token");
   }
 };
-////////////////////
+//////////////////// register API ////////////////////
 app.post("/register/", async (request, response) => {
-  let { username, password } = request.body;
-  let user = `SELECT * FROM user where username = '${username}'`;
-  user = await db.get(user);
-  if (user === undefined) {
-    let hashedPassword = await bcrypt.hash(password, 10);
-    let insertQuery = `INSERT INTO user (username,password)
-                                VALUES('${username}','${hashedPassword}')`;
-    await db.run(insertQuery);
-  } else {
-    response.status(400);
-    response.send("User Already Exists");
-  }
-});
-///////////////////
-app.post("/login/", async (request, response) => {
-  const { username, password } = request.body;
-  let user = `SELECT * FROM user WHERE username = '${username}'`;
-  user = await db.get(user);
-  if (user !== undefined) {
-    let comparePass = await bcrypt.compare(password, user.password);
-    if (comparePass === true) {
-      let payLoad = { username: username };
-      let jwtToken = await jsonwebtoken.sign(payLoad, "NaveenKumarNuthalapati");
-
-      response.send({ jwtToken });
+  try {
+    let { username, password } = request.body;
+    let user = `SELECT * FROM user where username = '${username}'`;
+    user = await db.get(user);
+    if (user === undefined) {
+      let hashedPassword = await bcrypt.hash(password, 10);
+      let insertQuery = `INSERT INTO user (username,password)
+                            VALUES('${username}','${hashedPassword}')`;
+      await db.run(insertQuery);
     } else {
       response.status(400);
-      response.send("Invalid password");
+      response.send("User Already Exists");
     }
-  } else {
-    response.status(400);
-    response.send("Invalid user");
+  } catch (error) {
+    console.log(error);
   }
 });
-///////////////////
-app.get("/states/", AuthenticateToket, async (request, response) => {
-  let countries = `select state_id as stateId, state_name as stateName, population from state;`;
-  countries = await db.all(countries);
-  response.status(200);
-  response.send(countries);
-});
+//////////////////// login API ////////////////////
+app.post("/login/", async (request, response) => {
+  try {
+    const { username, password } = request.body;
+    let user = `SELECT * FROM user WHERE username = '${username}'`;
+    user = await db.get(user);
+    if (user !== undefined) {
+      let comparePass = await bcrypt.compare(password, user.password);
+      if (comparePass === true) {
+        let payLoad = { username: username };
+        let jwtToken = await jsonwebtoken.sign(
+          payLoad,
+          "NaveenKumarNuthalapati"
+        );
 
-app.get("/states/:stateId/", AuthenticateToket, async (request, response) => {
-  let { stateId } = request.params;
-  let state = `SELECT state_id as stateId,
-                          state_name as stateName, population from state
-                          WHERE state_id = ${stateId};`;
-  state = await db.get(state);
-  response.status(200);
-  response.send(state);
+        response.send({ jwtToken });
+      } else {
+        response.status(400);
+        response.send("Invalid password");
+      }
+    } else {
+      response.status(400);
+      response.send("Invalid user");
+    }
+  } catch (error) {
+    console.log(error);
+  }
 });
-//////////////////
+//////////////////// states get API ////////////////////
+app.get("/states/", AuthenticateToket, async (request, response) => {
+  try {
+    let countries = `select state_id as stateId, state_name as stateName, population from state;`;
+    countries = await db.all(countries);
+    response.status(200);
+    response.send(countries);
+  } catch (error) {}
+});
+//////////////////// states/:stateId get API ////////////////////
+app.get("/states/:stateId/", AuthenticateToket, async (request, response) => {
+  try {
+    let { stateId } = request.params;
+    let state = `SELECT state_id as stateId,
+                        state_name as stateName, population from state
+                        WHERE state_id = ${stateId};`;
+    state = await db.get(state);
+    response.status(200);
+    response.send(state);
+  } catch (error) {}
+});
+//////////////////// districts post API ////////////////////
 app.post("/districts/", AuthenticateToket, async (request, response) => {
   try {
     let { districtName, stateId, cases, cured, active, deaths } = request.body;
@@ -114,40 +129,55 @@ app.post("/districts/", AuthenticateToket, async (request, response) => {
   }
 });
 
-/////////////////
+//////////////////// districts/:districtId delete API ////////////////////
 app.delete(
   "/districts/:districtId/",
   AuthenticateToket,
   async (request, response) => {
-    let { districtId } = request.params;
-    let deleteQery = `DELETE FROM district WHERE district_id = ${districtId};`;
-    await db.run(deleteQery);
-    response.status(200);
-    response.send("District Removed");
+    try {
+      let { districtId } = request.params;
+      let deleteQery = `DELETE FROM district WHERE district_id = ${districtId};`;
+      await db.run(deleteQery);
+      response.status(200);
+      response.send("District Removed");
+    } catch (error) {
+      console.log(error);
+    }
   }
 );
-/////////////////
+//////////////////// districts/:districtId put API ////////////////////
 app.put(
   "/districts/:districtId/",
   AuthenticateToket,
   async (request, response) => {
-    let { districtId } = request.params;
+    try {
+      let { districtId } = request.params;
 
-    let { districtName, stateId, cases, cured, active, deaths } = request.body;
-    console.log(districtName);
-    let putQuery = `UPDATE district SET 
-                      district_name = '${districtName}',
-                      state_id = ${stateId},
-                      cases = ${cases},
-                      cured = ${cured},
-                      active = ${active},
-                      deaths = ${deaths}
-                      WHERE district_id = ${districtId};`;
-    await db.run(putQuery);
-    response.send("District Details Updated");
+      let {
+        districtName,
+        stateId,
+        cases,
+        cured,
+        active,
+        deaths,
+      } = request.body;
+      console.log(districtName);
+      let putQuery = `UPDATE district SET 
+                    district_name = '${districtName}',
+                    state_id = ${stateId},
+                    cases = ${cases},
+                    cured = ${cured},
+                    active = ${active},
+                    deaths = ${deaths}
+                    WHERE district_id = ${districtId};`;
+      await db.run(putQuery);
+      response.send("District Details Updated");
+    } catch (error) {
+      console.log(error);
+    }
   }
 );
-/////////////////
+//////////////////// districts/:districtId get API ////////////////////
 app.get(
   "/districts/:districtId/",
   AuthenticateToket,
@@ -167,20 +197,24 @@ FROM district WHERE district_id = ${districtId};`;
     }
   }
 );
-
+//////////////////// states/:stateId/stats get API ////////////////////
 app.get(
   "/states/:stateId/stats/",
   AuthenticateToket,
   async (request, response) => {
-    let { stateId } = request.params;
-    dis_stat = `SELECT sum(cases) as totalCases,
-                         sum(cured) as totalCured,
-                         sum(active) as totalActive,
-                         sum(deaths) as totalDeaths
-     FROM district WHERE state_id = ${stateId};`;
-    dis_stat = await db.get(dis_stat);
-    response.status(200);
-    response.send(dis_stat);
+    try {
+      let { stateId } = request.params;
+      dis_stat = `SELECT sum(cases) as totalCases,
+                        sum(cured) as totalCured,
+                        sum(active) as totalActive,
+                        sum(deaths) as totalDeaths
+    FROM district WHERE state_id = ${stateId};`;
+      dis_stat = await db.get(dis_stat);
+      response.status(200);
+      response.send(dis_stat);
+    } catch (error) {
+      console.log(error);
+    }
   }
 );
 module.exports = app;
