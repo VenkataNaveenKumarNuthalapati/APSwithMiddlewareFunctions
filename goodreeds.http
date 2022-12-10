@@ -1,0 +1,68 @@
+###
+POST http://localhost:3000/register/
+Content-Type: application/json
+
+{
+  "username": "christopher_phillips",
+  "password": "christy@123"
+}
+
+###
+POST http://localhost:3000/login/
+Content-Type: application/json
+
+{
+  "username": "christopher_phillips",
+  "password": "christy@123"
+}
+
+###
+GET http://localhost:3000/states/
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNocmlzdG9waGVyX3BoaWxsaXBzIiwiaWF0IjoxNjcwNTY4NzU5fQ.Ue_Y6GD64465he1cmSzv8jDN39ksW-SNvfn0enNtB_c
+
+###
+GET http://localhost:3000/states/7/
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNocmlzdG9waGVyX3BoaWxsaXBzIiwiaWF0IjoxNjcwNTY4NzU5fQ.Ue_Y6GD64465he1cmSzv8jDN39ksW-SNvfn0enNtB_c
+
+###
+POST http://localhost:3000/districts/
+Content-Type: application/json
+authorization: Bearer yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNocmlzdG9waGVyX3BoaWxsaXBzIiwiaWF0IjoxNjcwNTY4NzU5fQ.Ue_Y6GD64465he1cmSzv8jDN39ksW-SNvfn0enNtB_c
+
+{
+  "districtName": "Bagalkot",
+  "stateId": 3,
+  "cases": 2323,
+  "cured": 2000,
+  "active": 315,
+  "deaths": 8
+}
+
+###
+DELETE http://localhost:3000/districts/7/
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNocmlzdG9waGVyX3BoaWxsaXBzIiwiaWF0IjoxNjcwNTY4NzU5fQ.Ue_Y6GD64465he1cmSzv8jDN39ksW-SNvfn0enNtB_c
+
+###
+PUT http://localhost:3000/districts/20/
+Content-Type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNocmlzdG9waGVyX3BoaWxsaXBzIiwiaWF0IjoxNjcwNTY4NzU5fQ.Ue_Y6GD64465he1cmSzv8jDN39ksW-SNvfn0enNtB_c
+
+{
+  "districtName": "Nadia",
+  "stateId": 3,
+  "cases": 9628,
+  "cured": 6524,
+  "active": 3000,
+  "deaths": 104
+}
+
+###
+GET http://localhost:3000/districts/20/
+
+###
+GET http://localhost:3000/districts/322/
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNocmlzdG9waGVyX3BoaWxsaXBzIiwiaWF0IjoxNjcwNTY4NzU5fQ.Ue_Y6GD64465he1cmSzv8jDN39ksW-SNvfn0enNtB_c
+
+###
+GET http://localhost:3000/states/20/stats/
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNocmlzdG9waGVyX3BoaWxsaXBzIiwiaWF0IjoxNjcwNTY4NzU5fQ.Ue_Y6GD64465he1cmSzv8jDN39ksW-SNvfn0enNtB_c
